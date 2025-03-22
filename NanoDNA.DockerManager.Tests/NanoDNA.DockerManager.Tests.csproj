@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- Building / Publishing Metadata -->
+	<PropertyGroup>
+		<RootNamespace>NanoDNA.DockerManager.Tests</RootNamespace>
+		<ProductName>$(RootNamespace)</ProductName>
+		<AssemblyName>$(RootNamespace)</AssemblyName>
+		<OutputType>Library</OutputType>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<!-- Add Individual Platforms in NuGet Package -->
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<None Include="..\README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<!-- Nuget Package References -->
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="NUnit" Version="3.14.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\NanoDNA.DockerManager\NanoDNA.DockerManager.csproj" />
+	</ItemGroup>
+
+</Project>
