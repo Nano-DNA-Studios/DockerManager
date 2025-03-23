@@ -1,8 +1,8 @@
-﻿using NanoDNA.ProcessRunner;
-using System.Collections.Generic;
-using System;
+﻿using System;
 using System.Threading;
+using NanoDNA.ProcessRunner;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NanoDNA.DockerManager
 {
