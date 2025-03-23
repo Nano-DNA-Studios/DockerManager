@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic;
 
 namespace NanoDNA.DockerManager
 {
@@ -30,30 +27,27 @@ namespace NanoDNA.DockerManager
         public string Image { get; private set; }
 
         /// <summary>
-        /// Toggle for the Container to be run in Interactive Mode
-        /// </summary>
-        //public bool Interactive { get; private set; }
-
-        /// <summary>
-        /// Toggle for the Container to be run in Detached Mode
-        /// </summary>
-        //public bool Detached { get; private set; }
-
-        /// <summary>
         /// Environment Variables for the Docker Container
         /// </summary>
         public Dictionary<string, string> EnvironmentVariables { get; private set; }
+
+        /// <summary>
+        /// Toggle for the Container to Ignore Errors during Operations
+        /// </summary>
+        public bool IgnoreContainerErrors { get; private set; }
 
         /// <summary>
         /// Initializes a new Instance of a <see cref="DockerContainer"/>.
         /// </summary>
         /// <param name="name">Name of the Container once Started</param>
         /// <param name="image">Name of the Docker Image the Container will use</param>
+        /// <param name="ignoreContainerErrors">Toggle for Ignoring Container Operation Errors</param>
         /// <exception cref="ArgumentException">Thrown if the Name if Invalid</exception>
-        public DockerContainer(string name, string image)
+        public DockerContainer(string name, string image, bool ignoreContainerErrors = false)
         {
             Name = name;
             Image = image;
+            IgnoreContainerErrors = ignoreContainerErrors;
             EnvironmentVariables = new Dictionary<string, string>();
 
             if (Name != Name.ToLower())
@@ -69,11 +63,13 @@ namespace NanoDNA.DockerManager
         /// <param name="name">Name of the Container once Started</param>
         /// <param name="image">Name of the Docker Image the Container will use</param>
         /// <param name="environmentVariables">Dictionary of predefined Environment Variables</param>
+        /// <param name="ignoreContainerErrors">Toggle for Ignoring Container Operation Errors</param>
         /// <exception cref="ArgumentException">Thrown if the Name if Invalid</exception>
-        public DockerContainer(string name, string image, Dictionary<string, string> environmentVariables)
+        public DockerContainer(string name, string image, Dictionary<string, string> environmentVariables, bool ignoreContainerErrors = false)
         {
             Name = name;
             Image = image;
+            IgnoreContainerErrors = ignoreContainerErrors;
             EnvironmentVariables = environmentVariables;
 
             if (Name != Name.ToLower())
@@ -99,8 +95,6 @@ namespace NanoDNA.DockerManager
                 EnvironmentVariables.Add(name, value);
             else
                 throw new ArgumentException("Environment Variable Already Exists");
-
-            EnvironmentVariables.Add(name, value);
         }
 
         /// <summary>
@@ -121,25 +115,173 @@ namespace NanoDNA.DockerManager
             EnvironmentVariables[name] = value;
         }
 
-        public void Execute()
+        /// <summary>
+        /// Executes a Command in a Running Docker Container
+        /// </summary>
+        /// <param name="command">Command to run in the Running Container</param>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exists or if an Error Occured while getting the logs</exception>
+        public void Execute(string command)
         {
-            //Executes Docker Command
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists())
+                throw new Exception("Container Doesn't Exist, cannot Execute a Command in a Non Existent Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            runner.RunCommand($"docker exec {Name} {command}");
+
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
         }
 
+        /// <summary>
+        /// Gets the Logs of the Docker Container as a String.
+        /// </summary>
+        /// <returns>All Container logs as a single string</returns>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exists or if an Error Occured while getting the logs</exception>
         public string GetLogs()
         {
-            ///Return the docker logs as a string
-            return "";
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists())
+                throw new Exception("Container Doesn't Exist, cannot get Logs of a Non Existent Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            runner.RunCommand($"docker logs {Name}");
+
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Getting Docker Logs : {string.Join("\n", runner.StandardError)}");
+
+            return string.Join("\n", runner.StandardOutput);
         }
 
-        public void Remove()
+        /// <summary>
+        /// Removes the Docker Container from the Device
+        /// </summary>
+        /// <param name="force">Force the Removal of the Container</param>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
+        public void Remove(bool force = false)
         {
-            //Removes the Docker Container
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists())
+                throw new Exception("Container Doesn't Exist, cannot Remove a Non Existent Container");
+
+            if (Running() && !force)
+                throw new Exception("Cannot Remove a Running Container, set Force to True to Remove the Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            string forceArg = force ? "-f" : "";
+
+            runner.RunCommand($"docker rm {forceArg} {Name}");
+
+            if (runner.StandardError.Length != 0)
+                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
-        public void Stop()
+        /// <summary>
+        /// Removes the Docker Container from the Device Asynchronously
+        /// </summary>
+        /// <param name="force">Force the Removal of the Container</param>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
+        public async Task RemoveAsync(bool force = false)
         {
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
 
+            if (!Exists())
+                throw new Exception("Container Doesn't Exist, cannot Remove a Non Existent Container");
+
+            if (Running() && !force)
+                throw new Exception("Cannot Remove a Running Container, set Force to True to Remove the Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            string forceArg = force ? "-f" : "";
+
+            await runner.RunCommandAsync($"docker rm {forceArg} {Name}");
+
+            if (runner.StandardError.Length != 0)
+                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
+        }
+
+        /// <summary>
+        /// Stops the Docker Container
+        /// </summary>
+        /// <param name="time">Time for the Container to Stop, default is ~10 seconds</param>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
+        public void Stop(int time = 0)
+        {
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists() || !Running())
+                throw new Exception("Container Doesn't Exist or is Not Running, cannot Stop a Non Existent Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            string timeArg = time != 0 ? $"--time {time}" : "";
+
+            runner.RunCommand($"docker stop {timeArg} {Name}");
+
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
+        }
+
+        /// <summary>
+        /// Stops the Docker Container Asynchronously
+        /// </summary>
+        /// <param name="time">Time for the Container to Stop, default is ~10 seconds</param>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
+        public async Task StopAsync(int time = 0)
+        {
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists() || !Running())
+                throw new Exception("Container Doesn't Exist or is Not Running, cannot Stop a Non Existent Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            string timeArg = time != 0 ? $"--time {time}" : "";
+
+            await runner.RunCommandAsync($"docker stop {timeArg} {Name}");
+
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
+        }
+
+        /// <summary>
+        /// Forcefully Kills the Docker Container, stopping it Immediately
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
+        /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
+        public void Kill()
+        {
+            if (!Docker.Running())
+                throw new InvalidOperationException("Docker Service is not Running");
+
+            if (!Exists())
+                throw new Exception("Container Doesn't Exist, cannot Stop a Non Existent Container");
+
+            CommandRunner runner = new CommandRunner();
+
+            runner.RunCommand($"docker kill {Name}");
+
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Killing Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
         /// <summary>
@@ -154,12 +296,11 @@ namespace NanoDNA.DockerManager
         /// <summary>
         /// Runs a Docker Container with the specified Arguments on Startup Asynchronously, Removes itself once finished
         /// </summary>
-        /// <param name="arguments">Arguments to run on Startup</param>
-        /// <param name="ignoreErrors">Ignores Errors the Container encouters and doesn't throw them</param>
+        /// <param name="command">Command to run on Startup</param>
         /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
         /// <exception cref="Exception">Thrown if the Container already Exists or if an Error Occured in the container</exception>
         /// <returns>Nothing</returns>
-        public async Task RunAsync(string arguments, bool ignoreErrors = false)
+        public async Task RunAsync(string command)
         {
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -169,20 +310,19 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            await runner.RunCommandAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {arguments}");
+            await runner.RunCommandAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {command}");
 
-            if (runner.StandardError.Length != 0 && !ignoreErrors)
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
         /// <summary>
         /// Runs a Docker Container with the specified Arguments on Startup, Removes itself once finished
         /// </summary>
-        /// <param name="arguments">Arguments to run on Startup</param>
-        /// <param name="ignoreErrors">Ignores Errors the Container encouters and doesn't throw them</param>
+        /// <param name="command">Command to run on Startup</param>
         /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
         /// <exception cref="Exception">Thrown if the Container already Exists or if an Error Occured in the container</exception>
-        public void Run(string arguments, bool ignoreErrors = false)
+        public void Run(string command)
         {
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -192,9 +332,9 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {arguments}");
+            runner.RunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}");
 
-            if (runner.StandardError.Length != 0 && !ignoreErrors)
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
@@ -202,10 +342,9 @@ namespace NanoDNA.DockerManager
         /// Starts the Docker Container in Detached Mode
         /// </summary>
         /// <param name="interactive">Run the Container in Interactive Mode, method to artificially leave a container "Hanging", wasteful method</param>
-        /// <param name="ignoreErrors">Ignores Errors the Container encouters and doesn't throw them</param>
         /// <exception cref="InvalidOperationException">Thrown if the Docker Service is not Running</exception>
         /// <exception cref="Exception">Thrown if the Container already Exists</exception>
-        public void Start(bool interactive = false, bool ignoreErrors = false)
+        public void Start(bool interactive = false)
         {
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -217,7 +356,7 @@ namespace NanoDNA.DockerManager
 
             runner.RunCommand($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
 
-            if (runner.StandardError.Length != 0 && !ignoreErrors)
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
@@ -225,11 +364,10 @@ namespace NanoDNA.DockerManager
         /// Starts the Docker Container in Detached Mode Asynchronously
         /// </summary>
         /// <param name="interactive">Run the Container in Interactive Mode, method to artificially leave a container "Hanging", wasteful method</param>
-        /// <param name="ignoreErrors">Ignores Errors the Container encouters and doesn't throw them</param>
         /// <exception cref="InvalidOperationException">Thrown if the Docker Service is not Running</exception>
         /// <exception cref="Exception">Thrown if the Container already Exists</exception>
         /// <returns>Nothing</returns>
-        public async Task StartAsync(bool interactive = false, bool ignoreErrors = false)
+        public async Task StartAsync(bool interactive = false)
         {
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -237,13 +375,11 @@ namespace NanoDNA.DockerManager
             if (Exists())
                 throw new Exception("Container Already Exists, Rename the Container or Remove the Old Container");
 
-            string interactiveFlag = interactive ? "-it" : "";
-
             CommandRunner runner = new CommandRunner();
 
             await runner.RunCommandAsync($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
 
-            if (runner.StandardError.Length != 0 && !ignoreErrors)
+            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
         }
 
@@ -252,21 +388,18 @@ namespace NanoDNA.DockerManager
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to Exist</returns>
-        public Task WaitForExists(int maxWaitSec = 5)
+        public void WaitUntilExists(int maxWaitSec = 10)
         {
-            return Task.Run(() =>
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (!Exists() && count < waitCount)
             {
-                int waitCount = maxWaitSec * 10;
-                int count = 0;
-                while (!Exists() && count < waitCount)
-                {
-                    Thread.Sleep(100);
-                    count++;
-                }
+                Thread.Sleep(100);
+                count++;
+            }
 
-                if (Docker.DEBUG)
-                    Console.WriteLine($"Docker Container Exists : {Exists()} ({count})");
-            });
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Exists : {Exists()} ({count})");
         }
 
         /// <summary>
@@ -274,21 +407,18 @@ namespace NanoDNA.DockerManager
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Running</returns>
-        public Task WaitForRunning(int maxWaitSec = 5)
+        public void WaitUntilRunning(int maxWaitSec = 10)
         {
-            return Task.Run(() =>
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (!Running() && count < waitCount)
             {
-                int waitCount = maxWaitSec * 10;
-                int count = 0;
-                while (!Running() && count < waitCount)
-                {
-                    Thread.Sleep(100);
-                    count++;
-                }
+                Thread.Sleep(100);
+                count++;
+            }
 
-                if (Docker.DEBUG)
-                    Console.WriteLine($"Docker Container Running : {Running()} ({count})");
-            });
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Running : {Running()} ({count})");
         }
 
         /// <summary>
@@ -296,21 +426,75 @@ namespace NanoDNA.DockerManager
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Ready</returns>
-        public Task WaitForReady(int maxWaitSec = 5)
+        public void WaitUntilReady(int maxWaitSec = 10)
         {
-            return Task.Run(() =>
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (!Ready() && count < waitCount)
             {
-                int waitCount = maxWaitSec * 10;
-                int count = 0;
-                while (!Ready() && count < 50)
-                {
-                    Thread.Sleep(100);
-                    count++;
-                }
+                Thread.Sleep(100);
+                count++;
+            }
 
-                if (Docker.DEBUG)
-                    Console.WriteLine($"Docker Container Ready : {Ready()} ({count})");
-            });
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Ready : {Ready()} ({count})");
+        }
+
+        /// <summary>
+        /// Waits for the Container to Not Exist for a specified amount of time
+        /// </summary>
+        /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
+        /// <returns>Task Waiting for the Container to Exist</returns>
+        public void WaitUntilRemoved(int maxWaitSec = 10)
+        {
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (Exists() && count < waitCount)
+            {
+                Thread.Sleep(100);
+                count++;
+            }
+
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Exists : {Exists()} ({count})");
+        }
+
+        /// <summary>
+        /// Waits for the Container to Not be Running for a specified amount of time
+        /// </summary>
+        /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
+        /// <returns>Task Waiting for the Container to be Running</returns>
+        public void WaitUntilStopped(int maxWaitSec = 10)
+        {
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (Running() && count < waitCount)
+            {
+                Thread.Sleep(100);
+                count++;
+            }
+
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Running : {Running()} ({count})");
+        }
+
+        /// <summary>
+        /// Waits for the Container to Not be Ready for a specified amount of time
+        /// </summary>
+        /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
+        /// <returns>Task Waiting for the Container to be Ready</returns>
+        public void WaitUntilUnready(int maxWaitSec = 10)
+        {
+            int waitCount = maxWaitSec * 10;
+            int count = 0;
+            while (Ready() && count < waitCount)
+            {
+                Thread.Sleep(100);
+                count++;
+            }
+
+            if (Docker.DEBUG)
+                Console.WriteLine($"Docker Container Ready : {Ready()} ({count})");
         }
 
         /// <summary>
@@ -364,6 +548,12 @@ namespace NanoDNA.DockerManager
             return env;
         }
 
+        /// <summary>
+        /// Gets the Addityional Arguments for the Containers Startup
+        /// </summary>
+        /// <param name="detached">Toggle for Container to Startup in Detached Mode</param>
+        /// <param name="interactive">Toggle for Container to Startup in Interactive Mode</param>
+        /// <returns>Arguments to Add to the Container Startup</returns>
         private string GetAdditionalArguments(bool detached, bool interactive)
         {
             string args = "";

@@ -3,8 +3,14 @@ using System;
 
 namespace NanoDNA.DockerManager
 {
+    /// <summary>
+    /// Global Static Docker Class to interact with the Docker Service on the Device without Containers
+    /// </summary>
     public static class Docker
     {
+        /// <summary>
+        /// Used to Debug some if the Wait Statements, internal for development purposes
+        /// </summary>
         internal static bool DEBUG = false;
 
         /// <summary>
@@ -34,16 +40,7 @@ namespace NanoDNA.DockerManager
 
             runner.RunCommand("docker info");
 
-            //Console.WriteLine($"STDOut : {string.Join("\n", runner.StandardOutput)}");
-            //Console.WriteLine($"STDErr : {string.Join("\n", runner.StandardError)}");
-
             return !(string.Join("\n", runner.StandardError).Contains("ERROR: error during connect"));
         }
-
-
-
-
-
-
     }
 }
