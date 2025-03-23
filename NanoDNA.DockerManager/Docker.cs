@@ -48,7 +48,7 @@ namespace NanoDNA.DockerManager
         /// </summary>
         /// <param name="containerName">Name of the Container</param>
         /// <returns>True if the Container is Running, False otherwise</returns>
-        public static bool ContainerRunning (string containerName)
+        public static bool ContainerRunning(string containerName)
         {
             if (!Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -68,7 +68,7 @@ namespace NanoDNA.DockerManager
         /// <param name="time">Time for the Container to Stop, default is ~10 seconds</param>
         /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
         /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
-        public static void StopContainer (string containerName, int time = 0)
+        public static void StopContainer(string containerName, int time = 0)
         {
             if (!Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -92,7 +92,7 @@ namespace NanoDNA.DockerManager
         /// <param name="containerName">Name of the Container</param>
         /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
         /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
-        public static void KillContainer (string containerName)
+        public static void KillContainer(string containerName)
         {
             if (!Running())
                 throw new InvalidOperationException("Docker Service is not Running");
@@ -115,7 +115,7 @@ namespace NanoDNA.DockerManager
         /// <param name="force">Force the Removal of the Container</param>
         /// <exception cref="InvalidOperationException">Thrown if Docker Service is not Started</exception>
         /// <exception cref="Exception">Thrown if the Container doesn't Exist</exception>
-        public static void RemoveContainer (string containerName, bool force = false)
+        public static void RemoveContainer(string containerName, bool force = false)
         {
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
