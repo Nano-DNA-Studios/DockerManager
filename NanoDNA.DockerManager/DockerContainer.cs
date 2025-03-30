@@ -356,6 +356,8 @@ namespace NanoDNA.DockerManager
 
             string command = $"docker run --name {Name} --privileged -v \"/var/run/docker.sock\":\"/var/run/docker.sock\" {GetAdditionalArguments(true, interactive)} {Image}";
 
+
+
             runner.RunCommand(command);
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
