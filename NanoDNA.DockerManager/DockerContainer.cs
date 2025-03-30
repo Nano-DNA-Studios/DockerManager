@@ -354,7 +354,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            string command = $"docker run --name {Name} --privileged -v \"/var/run/docker.sock\":\"/var/run/docker.sock\" {GetAdditionalArguments(true, interactive)} {Image}";
+            string command = $"docker run --name {Name} --privileged -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}";
 
 
 
