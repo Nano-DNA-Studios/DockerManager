@@ -354,7 +354,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
+            runner.RunCommand($"docker run --name {Name} --privileged -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : (Command : {$"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}"}) \n{string.Join("\n", runner.StandardError)}");
