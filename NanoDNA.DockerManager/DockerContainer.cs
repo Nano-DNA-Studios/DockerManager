@@ -356,7 +356,13 @@ namespace NanoDNA.DockerManager
 
             //string command = $"docker run --name {Name} --privileged --group-add $(getent group docker | cut -d: -f3) -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}";
 
-            string command = $"/bin/bash -c \"docker run --name {Name} --privileged --group-add $(getent group docker | cut -d: -f3) -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}\"";
+            CommandRunner runner2 = new CommandRunner();
+
+            runner2.RunCommand("(getent group docker | cut -d: -f3)");
+
+            string ID = runner2.StandardOutput[0];
+
+            string command = $"/bin/bash -c \"docker run --name {Name} --privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}\"";
 
 
             runner.RunCommand(command);
