@@ -122,12 +122,12 @@ namespace NanoDNA.DockerManager.Tests
         {
             DockerContainer container = new DockerContainer(name, image);
 
-            container.AddEnvironmentVariable("REPO", "https:/");
-            container.AddEnvironmentVariable("TOKEN", "git_");
+            container.AddEnvironmentVariable("REPO", "https");
+            container.AddEnvironmentVariable("TOKEN", "git");
 
             Assert.That(container.EnvironmentVariables.Count, Is.EqualTo(2), "Container doesn't have 2 Environment Variables");
-            Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("https:/"), "REPO Environment Variable is Wrong");
-            Assert.That(container.EnvironmentVariables["TOKEN"], Is.EqualTo("git_"), "TOKEN Environment Variable is Wrong");
+            Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("https"), "REPO Environment Variable is Wrong");
+            Assert.That(container.EnvironmentVariables["TOKEN"], Is.EqualTo("git"), "TOKEN Environment Variable is Wrong");
 
             Assert.Throws<ArgumentException>(() => container.AddEnvironmentVariable("REPO", "http"));
 
@@ -152,12 +152,12 @@ namespace NanoDNA.DockerManager.Tests
             container.AddEnvironmentVariable("REPO", "");
             container.AddEnvironmentVariable("TOKEN", "");
 
-            container.SetEnvironmentVariable("REPO", "https:/");
-            container.SetEnvironmentVariable("TOKEN", "git_");
+            container.SetEnvironmentVariable("REPO", "https");
+            container.SetEnvironmentVariable("TOKEN", "git");
 
             Assert.That(container.EnvironmentVariables.Count, Is.EqualTo(2), "Container doesn't have 2 Environment Variables");
-            Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("https:/"), "REPO Environment Variable is Wrong");
-            Assert.That(container.EnvironmentVariables["TOKEN"], Is.EqualTo("git_"), "TOKEN Environment Variable is Wrong");
+            Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("https"), "REPO Environment Variable is Wrong");
+            Assert.That(container.EnvironmentVariables["TOKEN"], Is.EqualTo("git"), "TOKEN Environment Variable is Wrong");
 
             Assert.Throws<ArgumentException>(() => container.SetEnvironmentVariable("IDK", "value"));
 
