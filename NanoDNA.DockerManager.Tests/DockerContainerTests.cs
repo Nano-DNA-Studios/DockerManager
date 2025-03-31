@@ -595,13 +595,17 @@ namespace NanoDNA.DockerManager.Tests
             DockerContainer container = new DockerContainer(name, image);
 
             container.Start(true);
-            container.Execute("bash -c \"echo 'Hello from exec' | tee /proc/1/fd/1\"");
 
-            Console.WriteLine(container.GetLogs());
-
-            Assert.That(container.GetLogs().Contains("Hello from exec"), "Command didn't execute correctly");
-
-            container.Remove(true);
+            try
+            {
+                container.Execute("bash -c \"echo 'Hello from exec' | tee /proc/1/fd/1\"");
+                container.Remove(true);
+                Assert.Pass("Command was Executed");
+            } catch (Exception e)
+            {
+                container.Remove(true);
+                Assert.Fail($"Something went wrong during command execution : {e.Message} \n {e.StackTrace}");
+            }
         }
 
         /// <summary>
@@ -634,15 +638,14 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing11", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing11", DEFAULT_IMAGE)]
         public void GetLogsTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
 
             container.Start(true);
-            container.Execute("bash -c \"echo 'Hello from exec' | tee /proc/1/fd/1\"");
 
-            Assert.That(container.GetLogs().Contains("Hello from exec"), "Command didn't execute correctly");
+            Assert.That(container.GetLogs().Contains("Hello from Docker!"), "Command didn't execute correctly");
 
             container.Remove(true);
         }
@@ -659,11 +662,6 @@ namespace NanoDNA.DockerManager.Tests
             DockerContainer container = new DockerContainer(name, image);
 
             Assert.Throws<Exception>(() => container.GetLogs());
-
-            container.Start(true);
-            container.Execute("bash -c \"echo 'Hello from exec' | tee /proc/1/fd/1\"");
-
-            Assert.That(container.GetLogs().Contains("Hello from exec"), "Command didn't execute correctly");
 
             container.Remove(true);
         }

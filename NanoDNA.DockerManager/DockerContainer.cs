@@ -131,13 +131,16 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.TryRunCommand($"docker exec {Name} {command}");
+            if (!runner.TryRunCommand($"docker exec {Name} {command}"))
+            {
+                foreach (string line in runner.StandardOutput)
+                    Console.WriteLine(line);
 
-            foreach (string line in runner.StandardOutput)
-                Console.WriteLine(line);
+                foreach (string line in runner.StandardError)
+                    Console.WriteLine(line);
 
-            foreach (string line in runner.StandardError)
-                Console.WriteLine(line);
+                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
+            }
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
@@ -340,7 +343,16 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.TryRunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}");
+            if (!runner.TryRunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}"))
+            {
+                foreach (string line in runner.StandardOutput)
+                    Console.WriteLine(line);
+
+                foreach (string line in runner.StandardError)
+                    Console.WriteLine(line);
+
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+            }
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
