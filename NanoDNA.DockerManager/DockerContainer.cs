@@ -362,8 +362,11 @@ namespace NanoDNA.DockerManager
 
             string ID = runner2.StandardOutput[0];
 
+            Console.WriteLine($"Group ID : {ID}");
+
             string command = $"/bin/bash -c \"docker run --name {Name} --privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}\"";
 
+            Console.WriteLine($"Command : {command}");
 
             runner.RunCommand(command);
 
