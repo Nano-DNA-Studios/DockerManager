@@ -619,7 +619,7 @@ namespace NanoDNA.DockerManager.Tests
 
             container.Start(true);
 
-            Assert.Throws<Exception>(() => container.Execute("echo 'Hello from exec' >> /proc/1/fd/1"));
+            Assert.Throws<Exception>(() => container.Execute("echoe 'Hello from exec'"));
 
             container.Remove(true);
         }
