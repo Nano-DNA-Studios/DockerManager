@@ -377,7 +377,7 @@ namespace NanoDNA.DockerManager
             runner.RunCommand(command);
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : (Command : {command}) \n{string.Join("\n", runner.StandardError)}");
+                throw new Exception($"Error Starting Docker Container : (Command : {command}) \n{string.Join("\n", runner.StandardError)} \n {string.Join("\n", runner.StandardOutput)}");
         }
 
         /// <summary>
