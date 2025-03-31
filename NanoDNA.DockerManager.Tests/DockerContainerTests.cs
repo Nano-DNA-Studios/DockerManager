@@ -144,7 +144,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_IMAGE)]
+        [TestCase("testing2", DEFAULT_IMAGE)]
         public void SetEnvironmentVariableTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -178,7 +178,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing3", DEFAULT_INTERACTIVE_IMAGE)]
         public void StartContainerTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -198,7 +198,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing4", DEFAULT_INTERACTIVE_IMAGE)]
         public void StartContainerFailTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -220,7 +220,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", BAD_DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing5", BAD_DEFAULT_INTERACTIVE_IMAGE)]
         public void StartContainerFailTest2(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -234,7 +234,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing6", DEFAULT_INTERACTIVE_IMAGE)]
         public void StartAsyncTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -539,7 +539,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing7", DEFAULT_INTERACTIVE_IMAGE)]
         public void KillContainerTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -561,7 +561,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing8", DEFAULT_INTERACTIVE_IMAGE)]
         public void KillContainerFailTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -589,7 +589,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing9", DEFAULT_INTERACTIVE_IMAGE)]
         public void ExecuteCommandTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -610,7 +610,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing10", DEFAULT_INTERACTIVE_IMAGE)]
         public void ExecuteCommandFail(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -619,7 +619,7 @@ namespace NanoDNA.DockerManager.Tests
 
             container.Start(true);
 
-            Assert.Throws<Exception>(() => container.Execute("echoe 'Hello from exec'"));
+            Assert.Throws<Exception>(() => container.Execute("nonexistentcommand"));
 
             container.Remove(true);
         }
@@ -634,7 +634,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing11", DEFAULT_INTERACTIVE_IMAGE)]
         public void GetLogsTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -653,7 +653,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing12", DEFAULT_INTERACTIVE_IMAGE)]
         public void GetLogsFailTest(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
@@ -676,7 +676,7 @@ namespace NanoDNA.DockerManager.Tests
         /// <param name="name">Name of the Container</param>
         /// <param name="image">Name of the Image</param>
         [Test]
-        [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
+        [TestCase("testing13", DEFAULT_INTERACTIVE_IMAGE)]
         public void StateTests(string name, string image)
         {
             DockerContainer container = new DockerContainer(name, image);
