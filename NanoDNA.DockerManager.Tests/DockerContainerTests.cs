@@ -122,8 +122,8 @@ namespace NanoDNA.DockerManager.Tests
         {
             DockerContainer container = new DockerContainer(name, image);
 
-            container.AddEnvironmentVariable("REPO", "https");
-            container.AddEnvironmentVariable("TOKEN", "git");
+            container.AddEnvironmentVariable("REPO", "dummy");
+            container.AddEnvironmentVariable("TOKEN", "dummy");
 
             Assert.That(container.EnvironmentVariables.Count, Is.EqualTo(2), "Container doesn't have 2 Environment Variables");
             Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("dummy"), "REPO Environment Variable is Wrong");
@@ -153,7 +153,7 @@ namespace NanoDNA.DockerManager.Tests
             container.AddEnvironmentVariable("TOKEN", "");
 
             container.SetEnvironmentVariable("REPO", "dummy");
-            container.SetEnvironmentVariable("TOKEN", "gummy");
+            container.SetEnvironmentVariable("TOKEN", "dummy");
 
             Assert.That(container.EnvironmentVariables.Count, Is.EqualTo(2), "Container doesn't have 2 Environment Variables");
             Assert.That(container.EnvironmentVariables["REPO"], Is.EqualTo("dummy"), "REPO Environment Variable is Wrong");

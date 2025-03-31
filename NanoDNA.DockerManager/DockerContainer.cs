@@ -360,11 +360,17 @@ namespace NanoDNA.DockerManager
 
             runner2.RunCommand("(getent group docker | cut -d: -f3)");
 
+            foreach (string line in runner2.StandardOutput)
+                Console.WriteLine(line);
+
+            foreach (string line in runner2.StandardError)
+                Console.WriteLine(line);
+
             string ID = runner2.StandardOutput[0];
 
             Console.WriteLine($"Group ID : {ID}");
 
-            string command = $"/bin/bash -c \"docker run --name {Name} --privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}\"";
+            string command = $"docker run --name {Name} --privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock {GetAdditionalArguments(true, interactive)} {Image}";
 
             Console.WriteLine($"Command : {command}");
 
