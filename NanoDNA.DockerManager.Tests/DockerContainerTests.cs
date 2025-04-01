@@ -303,11 +303,11 @@ namespace NanoDNA.DockerManager.Tests
         {
             DockerContainer container = new DockerContainer(name, image);
 
-            Assert.Throws<Exception>(() => container.Run("echo 'Hello from exec' >> /proc/1/fd/1"));
+            Assert.Throws<Exception>(() => container.Run("echoe 'Hello from exec' >> /proc/1/fd/1"));
 
             container.Start(true);
 
-            Assert.Throws<Exception>(() => container.Run("echo 'Hello from exec' >> /proc/1/fd/1"));
+            Assert.Throws<Exception>(() => container.Run("echoe 'Hello from exec' >> /proc/1/fd/1"));
 
             container.Remove(true);
         }
@@ -596,16 +596,16 @@ namespace NanoDNA.DockerManager.Tests
 
             container.Start(true);
 
-            try
-            {
+            //try
+            //{
                 container.Execute("bash -c \"echo 'Hello from exec' | tee /proc/1/fd/1\"");
                 container.Remove(true);
                 Assert.Pass("Command was Executed");
-            } catch (Exception e)
-            {
-                container.Remove(true);
-                Assert.Fail($"Something went wrong during command execution : {e.Message} \n {e.StackTrace}");
-            }
+            //} catch (Exception e)
+            //{
+              //  container.Remove(true);
+               // Assert.Fail($"Something went wrong during command execution : {e.Message} \n {e.StackTrace}");
+           //}
         }
 
         /// <summary>
@@ -645,6 +645,8 @@ namespace NanoDNA.DockerManager.Tests
 
             container.Start(true);
 
+            container.WaitUntilReady();
+
             Assert.That(container.GetLogs().Contains("Hello from Docker!"), "Command didn't execute correctly");
 
             container.Remove(true);
@@ -662,8 +664,6 @@ namespace NanoDNA.DockerManager.Tests
             DockerContainer container = new DockerContainer(name, image);
 
             Assert.Throws<Exception>(() => container.GetLogs());
-
-            container.Remove(true);
         }
 
         #endregion

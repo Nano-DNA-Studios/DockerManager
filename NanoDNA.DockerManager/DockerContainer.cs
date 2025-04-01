@@ -157,7 +157,7 @@ namespace NanoDNA.DockerManager
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
 
-            if (!Running()) //Maybe Exists?
+            if (!Exists()) //Maybe Exists?
                 throw new Exception("Container Doesn't Exist, cannot get Logs of a Non Existent Container");
 
             Console.WriteLine($"Docker is running? : {Running()}");
