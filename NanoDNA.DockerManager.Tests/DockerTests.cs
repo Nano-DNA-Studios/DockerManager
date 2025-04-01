@@ -31,7 +31,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void StopContainerTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             container.Start(true);
 
@@ -58,7 +58,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void StopContainerFailTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             Assert.Throws<Exception>(() => Docker.StopContainer(name));
 
@@ -88,7 +88,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void KillContainerTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             container.Start(true);
 
@@ -110,7 +110,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void KillContainerFailTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             Assert.Throws<Exception>(() => Docker.KillContainer(name));
 
@@ -138,7 +138,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void RemoveContainerTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             container.Start(true);
 
@@ -167,7 +167,7 @@ namespace NanoDNA.DockerManager.Tests
         [TestCase("testing", DEFAULT_INTERACTIVE_IMAGE)]
         public void RemoveContainerFailTest(string name, string image)
         {
-            DockerContainer container = new DockerContainer(name, image);
+            DockerContainer container = new DockerContainer(name, image, true);
 
             Assert.Throws<Exception>(() => Docker.RemoveContainer(name));
 
