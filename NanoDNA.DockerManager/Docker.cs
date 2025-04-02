@@ -21,7 +21,7 @@ namespace NanoDNA.DockerManager
         {
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand("docker info");
+            runner.TryRunCommand("docker info");
 
             return !(string.Join("\n", runner.StandardError).Contains("ERROR: error during connect"));
         }
@@ -38,7 +38,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker inspect {containerName}");
+            runner.TryRunCommand($"docker inspect {containerName}");
 
             return runner.StandardError.Length == 0;
         }
@@ -56,7 +56,7 @@ namespace NanoDNA.DockerManager
             CommandRunner runner = new CommandRunner();
             string stateStr = "\"{{.State.Running}}\"";
 
-            runner.RunCommand($"docker inspect -f {stateStr} {containerName}");
+            runner.TryRunCommand($"docker inspect -f {stateStr} {containerName}");
 
             return runner.StandardOutput[runner.StandardOutput.Length - 1] == "true";
         }
@@ -80,7 +80,7 @@ namespace NanoDNA.DockerManager
 
             string timeArg = time != 0 ? $"--time {time}" : "";
 
-            runner.RunCommand($"docker stop {timeArg} {containerName}");
+            runner.TryRunCommand($"docker stop {timeArg} {containerName}");
 
             if (runner.StandardError.Length != 0)
                 throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -102,7 +102,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker kill {containerName}");
+            runner.TryRunCommand($"docker kill {containerName}");
 
             if (runner.StandardError.Length != 0)
                 throw new Exception($"Error Killing Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -130,7 +130,7 @@ namespace NanoDNA.DockerManager
 
             string forceArg = force ? "-f" : "";
 
-            runner.RunCommand($"docker rm {forceArg} {containerName}");
+            runner.TryRunCommand($"docker rm {forceArg} {containerName}");
 
             if (runner.StandardError.Length != 0)
                 throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");

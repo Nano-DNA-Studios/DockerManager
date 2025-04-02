@@ -3,6 +3,7 @@ using System.Threading;
 using NanoDNA.ProcessRunner;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Net;
 
 namespace NanoDNA.DockerManager
 {
@@ -37,13 +38,19 @@ namespace NanoDNA.DockerManager
         public bool IgnoreContainerErrors { get; private set; }
 
         /// <summary>
+        /// Toggle for Allowing Docker In Docker
+        /// </summary>
+        public bool DockerInDocker { get; private set; }
+
+        /// <summary>
         /// Initializes a new Instance of a <see cref="DockerContainer"/>.
         /// </summary>
         /// <param name="name">Name of the Container once Started</param>
         /// <param name="image">Name of the Docker Image the Container will use</param>
+        /// <param name="dockerInDocker">Toggle for Allowing Docker In Docker</param>
         /// <param name="ignoreContainerErrors">Toggle for Ignoring Container Operation Errors</param>
         /// <exception cref="ArgumentException">Thrown if the Name if Invalid</exception>
-        public DockerContainer(string name, string image, bool ignoreContainerErrors = false)
+        public DockerContainer(string name, string image, bool dockerInDocker, bool ignoreContainerErrors = false)
         {
             Name = name;
             Image = image;
@@ -55,6 +62,20 @@ namespace NanoDNA.DockerManager
 
             if (Name != Name.Trim() || Name != Name.Replace(" ", ""))
                 throw new ArgumentException("Name must not contain spaces");
+
+            if (dockerInDocker)
+            {
+                //if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
+                //    EnvironmentVariables.Add("DOCKER_HOST", "tcp://host.docker.internal:2375");
+
+                if (!OperatingSystem.IsLinux())
+                {
+                    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
+                    return;
+                }
+
+                DockerInDocker = dockerInDocker;
+            }
         }
 
         /// <summary>
@@ -63,9 +84,10 @@ namespace NanoDNA.DockerManager
         /// <param name="name">Name of the Container once Started</param>
         /// <param name="image">Name of the Docker Image the Container will use</param>
         /// <param name="environmentVariables">Dictionary of predefined Environment Variables</param>
+        /// <param name="dockerInDocker">Toggle for Allowing Docker In Docker</param>
         /// <param name="ignoreContainerErrors">Toggle for Ignoring Container Operation Errors</param>
         /// <exception cref="ArgumentException">Thrown if the Name if Invalid</exception>
-        public DockerContainer(string name, string image, Dictionary<string, string> environmentVariables, bool ignoreContainerErrors = false)
+        public DockerContainer(string name, string image, Dictionary<string, string> environmentVariables, bool dockerInDocker, bool ignoreContainerErrors = false)
         {
             Name = name;
             Image = image;
@@ -77,6 +99,20 @@ namespace NanoDNA.DockerManager
 
             if (Name != Name.Trim() || Name != Name.Replace(" ", ""))
                 throw new ArgumentException("Name must not contain spaces");
+
+            if (dockerInDocker)
+            {
+                //if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
+                //    EnvironmentVariables.Add("DOCKER_HOST", "tcp://host.docker.internal:2375");
+
+                if (!OperatingSystem.IsLinux())
+                {
+                    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
+                    return;
+                }
+
+                DockerInDocker = dockerInDocker;
+            }
         }
 
         /// <summary>
@@ -126,12 +162,13 @@ namespace NanoDNA.DockerManager
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
 
-            if (!Exists())
+            if (!Running())
                 throw new Exception("Container Doesn't Exist, cannot Execute a Command in a Non Existent Container");
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker exec {Name} {command}");
+            if (!runner.TryRunCommand($"docker exec {Name} {command}"))
+                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
@@ -148,12 +185,12 @@ namespace NanoDNA.DockerManager
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
 
-            if (!Exists())
+            if (!Exists()) //Maybe Exists?
                 throw new Exception("Container Doesn't Exist, cannot get Logs of a Non Existent Container");
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker logs {Name}");
+            runner.TryRunCommand($"docker logs {Name}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Getting Docker Logs : {string.Join("\n", runner.StandardError)}");
@@ -182,7 +219,7 @@ namespace NanoDNA.DockerManager
 
             string forceArg = force ? "-f" : "";
 
-            runner.RunCommand($"docker rm {forceArg} {Name}");
+            runner.TryRunCommand($"docker rm {forceArg} {Name}");
 
             if (runner.StandardError.Length != 0)
                 throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -209,7 +246,7 @@ namespace NanoDNA.DockerManager
 
             string forceArg = force ? "-f" : "";
 
-            await runner.RunCommandAsync($"docker rm {forceArg} {Name}");
+            await runner.TryRunCommandAsync($"docker rm {forceArg} {Name}");
 
             if (runner.StandardError.Length != 0)
                 throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -233,7 +270,7 @@ namespace NanoDNA.DockerManager
 
             string timeArg = time != 0 ? $"--time {time}" : "";
 
-            runner.RunCommand($"docker stop {timeArg} {Name}");
+            runner.TryRunCommand($"docker stop {timeArg} {Name}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -257,7 +294,7 @@ namespace NanoDNA.DockerManager
 
             string timeArg = time != 0 ? $"--time {time}" : "";
 
-            await runner.RunCommandAsync($"docker stop {timeArg} {Name}");
+            await runner.TryRunCommandAsync($"docker stop {timeArg} {Name}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -273,12 +310,12 @@ namespace NanoDNA.DockerManager
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
 
-            if (!Exists())
+            if (!Running())
                 throw new Exception("Container Doesn't Exist, cannot Stop a Non Existent Container");
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker kill {Name}");
+            runner.TryRunCommand($"docker kill {Name}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Killing Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -310,7 +347,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            await runner.RunCommandAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {command}");
+            await runner.TryRunCommandAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {command}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -332,7 +369,8 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}");
+            if (!runner.TryRunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}"))
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -354,10 +392,12 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.RunCommand($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
+            string command = $"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}";
+
+            runner.TryRunCommand(command);
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+                throw new Exception($"Error Starting Docker Container : (Command : {command}) \n{string.Join("\n", runner.StandardError)} \n {string.Join("\n", runner.StandardOutput)}");
         }
 
         /// <summary>
@@ -377,7 +417,7 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            await runner.RunCommandAsync($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
+            await runner.TryRunCommandAsync($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
 
             if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
                 throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
@@ -515,7 +555,7 @@ namespace NanoDNA.DockerManager
             CommandRunner runner = new CommandRunner();
             string stateStr = "\"{{.State.Running}}\"";
 
-            runner.RunCommand($"docker inspect -f {stateStr} {Name}");
+            runner.TryRunCommand($"docker inspect -f {stateStr} {Name}");
 
             return runner.StandardOutput[runner.StandardOutput.Length - 1] == "true";
         }
@@ -529,7 +569,7 @@ namespace NanoDNA.DockerManager
             CommandRunner runner = new CommandRunner();
             string stateStr = "\"{{.State.Paused}}\"";
 
-            runner.RunCommand($"docker inspect -f {stateStr} {Name}");
+            runner.TryRunCommand($"docker inspect -f {stateStr} {Name}");
 
             return runner.StandardOutput[runner.StandardOutput.Length - 1] == "true";
         }
@@ -549,6 +589,24 @@ namespace NanoDNA.DockerManager
         }
 
         /// <summary>
+        /// Adds the Extra Arguments for Docker In Docker capabilities
+        /// </summary>
+        /// <returns>Arguments for Docker In Docker</returns>
+        private string GetDockerInDocker()
+        {
+            if (!DockerInDocker)
+                return "";
+
+            CommandRunner runner = new CommandRunner();
+
+            runner.TryRunCommand("(getent group docker | cut -d: -f3)");
+
+            string ID = runner.StandardOutput[0];
+
+            return $"--privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock ";
+        }
+
+        /// <summary>
         /// Gets the Addityional Arguments for the Containers Startup
         /// </summary>
         /// <param name="detached">Toggle for Container to Startup in Detached Mode</param>
@@ -561,6 +619,7 @@ namespace NanoDNA.DockerManager
             args += interactive ? "-it " : "";
             args += detached ? "-d " : "";
             args += GetEnvironmentVariables();
+            args += GetDockerInDocker();
 
             return args;
         }
