@@ -31,4 +31,4 @@ jobs:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
     steps:
       - name: Run Unit Tests using NUnit
-        run: dotnet test --no-restore --logger "console;verbosity=detailed" --filter "TestCategory!=Integration"
+        run: dotnet test -c Release --no-restore --logger "console;verbosity=detailed" --filter "TestCategory!=Integration"
