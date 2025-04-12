@@ -24,7 +24,7 @@ jobs:
           clean: true
 
       - name: Run .NET Restore to reload NuGet Packages
-        run: dotnet restore
+        run: dotnet restore -c Release
 
   test:
     needs: setup
