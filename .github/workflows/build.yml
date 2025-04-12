@@ -67,6 +67,11 @@ jobs:
       - name: Build as Standalone Source
         shell: bash
         run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true #-o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
+    
+      - name: File Directory
+        shell: bash
+        run: ls
+
 
   #upload-source:
   #  needs: build-source
