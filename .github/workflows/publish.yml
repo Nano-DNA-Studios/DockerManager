@@ -26,7 +26,7 @@ jobs:
 
       - name: Run .NET Restore to reload NuGet Packages
         working-directory: ${{ github.event.repository.name }}
-        run: dotnet restore -c Release
+        run: dotnet restore ${{ github.event.repository.name }}.csproj -c Release
 
   version:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
