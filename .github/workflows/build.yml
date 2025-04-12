@@ -68,19 +68,20 @@ jobs:
           echo "JSON : $packageJson"
           echo "PACKAGES=$packageJson" >> "$GITHUB_OUTPUT"
 
-  #upload-nuget:
-  #  runs-on: ["self-hosted", "run-${{github.run_id}}"]
-  #  needs: build-nuget
-  #  strategy:
-  #    matrix:
-  #      packages: ${{ fromJson(needs.build-nuget.outputs.packages) }}
-  #  steps:
-  #    - name: Upload NuGet packages as build artifacts
-  #      uses: actions/upload-artifact@v4
-  #      with:
-  #        name: ${{ matrix.packages }}
-  #        path: ./nupkg/${{ matrix.packages }}
-  #        retention-days: 1
+  upload-nuget:
+    runs-on: ["self-hosted", "run-${{github.run_id}}"]
+    needs: build-nuget
+    #strategy:
+    #  matrix:
+    #    packages: ${{ fromJson(needs.build-nuget.outputs.packages) }}
+    steps:
+      - name: Upload all NuGet packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./nupkg/*.nupkg
+          retention-days: 1
+
 
   build-source:
     needs: setup
@@ -92,7 +93,7 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet publish NanoDNA.DockerManager/NanoDNA.DockerManager.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true --no-restore -o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
+        run: dotnet publish NanoDNA.DockerManager/NanoDNA.DockerManager.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true -o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
 
   #upload-source:
   #  needs: build-source
