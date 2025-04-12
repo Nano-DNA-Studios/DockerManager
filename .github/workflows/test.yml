@@ -24,8 +24,7 @@ jobs:
           clean: true
 
       - name: Run .NET Restore to reload NuGet Packages
-        working-directory: ${{ github.event.repository.name }}.Tests
-        run: dotnet restore ${{ github.event.repository.name }}.csproj -c Release
+        run: dotnet restore 
 
   test:
     needs: setup
