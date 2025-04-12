@@ -78,7 +78,7 @@ jobs:
       - name: Upload all NuGet packages
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-packages
+          name: ${{ github.event.repository.name }}
           path: ./nupkg/*.nupkg
           retention-days: 1
 
