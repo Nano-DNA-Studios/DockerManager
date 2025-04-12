@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true -o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
+        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true -o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
 
   upload-source:
     needs: build-source
