@@ -15,7 +15,7 @@
 	</ItemGroup>
 
 	<!-- Development Project References -->
-	<ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(RepositoryName)' == 'GitHubAPICLI'">
+	<ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(RepositoryName)' == 'GitHubAPICLI-Solution'">
 		<ProjectReference Include="..\..\NanoDNA.ProcessRunner\NanoDNA.ProcessRunner\NanoDNA.ProcessRunner.csproj" />
 	</ItemGroup>
 
