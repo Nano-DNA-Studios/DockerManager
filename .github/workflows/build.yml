@@ -82,7 +82,7 @@ jobs:
     
       - name: Compress Standalone Source
         shell: bash
-        run: tar -czf bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }}/
+        run: tar -czf ${{ github.event.repository.name }}/bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }}/
   
       - name: Upload Standalone Source
         uses: actions/upload-artifact@v4
