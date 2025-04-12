@@ -66,7 +66,7 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet build ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true #-o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
+        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true #-o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
 
   upload-source:
     needs: build-source
@@ -82,11 +82,11 @@ jobs:
     
       - name: Compress Standalone Source
         shell: bash
-        run: tar -czf ${{ github.event.repository.name }}/bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }}/
+        run: tar -czf ./nupkg/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }}/ #${{ github.event.repository.name }}/bin/Release
   
       - name: Upload Standalone Source
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
-          path: bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
+          path: ./nupkg/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
           retention-days: 1
