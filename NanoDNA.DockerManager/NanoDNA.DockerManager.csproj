@@ -14,8 +14,13 @@
 		<None Include="..\README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 
+	<!-- Development Project References -->
+	<ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(RepositoryName)' == 'GitHubAPICLI'">
+		<ProjectReference Include="..\..\NanoDNA.ProcessRunner\NanoDNA.ProcessRunner\NanoDNA.ProcessRunner.csproj" />
+	</ItemGroup>
+
 	<!-- Nuget Packages -->
-	<ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<PackageReference Include="NanoDNA.ProcessRunner" Version="0.1.4" />
 	</ItemGroup>
 
