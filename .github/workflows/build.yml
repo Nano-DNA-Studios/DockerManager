@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Build for NuGet 
         shell: bash
-        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -f net8.0
+        run: dotnet build ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -f net8.0
 
       - name: Pack for NuGet
         id: pack-nuget
@@ -66,28 +66,23 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true #-o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
-    
-      - name: File Directory
+        run: dotnet build ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true #-o bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
+
+  upload-source:
+    needs: build-source
+    runs-on: ["self-hosted", "run-${{github.run_id}}"]
+    strategy:
+      max-parallel: 6
+      matrix:
+        platforms: ["win-x64"] #, "win-x86", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64"
+    steps:
+      - name: Compress Standalone Source
         shell: bash
-        run: ls
-
-
-  #upload-source:
-  #  needs: build-source
-  #  runs-on: ["self-hosted", "run-${{github.run_id}}"]
-  #  strategy:
-  #    max-parallel: 6
-  #    matrix:
-  #      platforms: ["win-x64"] #, "win-x86", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64"
-  #  steps:
-  #    - name: Compress Standalone Source
-  #      shell: bash
-  #      run: tar -czf bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}
-  #
-  #    - name: Upload Standalone Source
-  #      uses: actions/upload-artifact@v4
-  #      with:
-  #        name: ${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
-  #        path: bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
-  #        retention-days: 1
+        run: tar -czf bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz bin/Release/net8.0/${{ github.event.repository.name }}-${{ matrix.platforms }}
+  
+      - name: Upload Standalone Source
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
+          path: bin/Release/${{ github.event.repository.name }}-${{ matrix.platforms }}.tar.gz
+          retention-days: 1
