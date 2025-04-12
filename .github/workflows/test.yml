@@ -23,8 +23,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           clean: true
 
-      - name: Run .NET Restore to reload NuGet Packages
-        run: dotnet restore
+      #- name: Run .NET Restore to reload NuGet Packages
+      #  run: dotnet restore
 
   test:
     needs: setup
