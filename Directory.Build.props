@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 	
+	<!-- Import Parent Directory.Build.Props if Submodule -->
+	<Import Project="$(MSBuildThisFileDirectory)..\..\Directory.Build.props"
+      Condition="Exists('$(MSBuildThisFileDirectory)..\..\Directory.Build.props')" />
+	
 	<!-- Project Owner and Version Metadata -->
 	<PropertyGroup>
 		<Company>NanoDNA Studios</Company>
