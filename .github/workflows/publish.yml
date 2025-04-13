@@ -99,7 +99,7 @@ jobs:
         working-directory: ./nupkg/
         shell: bash
         run: |
-          echo "Uploading ${{ matrix.packages }} as a Release Asset"
+          echo "Uploading NuGet Package as a Release Asset"
           gh release upload "${{ github.event.release.tag_name }}" *.nupkg --repo ${{ github.repository }}
 
   build-source:
