@@ -80,7 +80,7 @@ jobs:
 
   build-source:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
-    needs: [setup, version]
+    needs: version
     strategy:
       max-parallel: 6
       matrix:
@@ -92,7 +92,7 @@ jobs:
   
   upload-source:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
-    needs: [build-source, version]
+    needs: build-source
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
@@ -120,7 +120,7 @@ jobs:
 
   publish-to-nuget:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
-    needs: [setup, build-nuget, build-source]
+    needs: build-nuget
     steps:
       - name: Publish to GitHub Packages
         shell: bash
