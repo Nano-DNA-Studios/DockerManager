@@ -87,6 +87,8 @@ jobs:
   upload-nuget:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
     needs: build-nuget
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Upload all NuGet packages
         uses: actions/upload-artifact@v4
@@ -96,7 +98,7 @@ jobs:
           retention-days: 1
 
       - name: Upload NuGet Packages to Release
-        working-directory: ./nupkg/
+        working-directory: ./nupkg
         shell: bash
         run: |
           echo "Uploading NuGet Package as a Release Asset"
