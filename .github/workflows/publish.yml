@@ -58,32 +58,6 @@ jobs:
         shell: bash
         run: dotnet pack -c Release -p:Version=${{ needs.version.outputs.version }} --no-build 
 
-      #- name: Extract Nuget Package Names
-      #  id: extract-package-names
-      #  shell: bash
-      #  run: |
-      #    packageNames=()
-      #    while IFS= read -r file; do
-      #        packageNames+=("$(basename "$file")")
-      #    done < <(find . -type f -name "*.nupkg")
-      #
-      #    if [ ${#packageNames[@]} -eq 0 ]; then
-      #        echo "No packages found. Setting empty JSON array."
-      #        packageJson="[]"
-      #    elif [ ${#packageNames[@]} -eq 1 ]; then
-      #        echo "Single Package Detected. Formatting in JSON Manually"
-      #        packageJson="[\"${packageNames[0]}\"]"
-      #    else
-      #        echo "Packing as JSON Array"
-      #        packageJson=$(printf '%s\n' "${packageNames[@]}" | jq -R . | jq -s .)
-      #    fi
-      #
-      #    # Ensure proper JSON formatting and escaping
-      #    packageJson=$(echo "$packageJson" | jq -c .)
-      #
-      #    echo "JSON : $packageJson"
-      #    echo "PACKAGES=$packageJson" >> "$GITHUB_OUTPUT"
-
   upload-nuget:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
     needs: build-nuget
