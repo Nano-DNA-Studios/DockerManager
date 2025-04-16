@@ -3,7 +3,6 @@ using System.Threading;
 using NanoDNA.ProcessRunner;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Net;
 
 namespace NanoDNA.DockerManager
 {
@@ -68,11 +67,11 @@ namespace NanoDNA.DockerManager
                 //if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
                 //    EnvironmentVariables.Add("DOCKER_HOST", "tcp://host.docker.internal:2375");
 
-                if (!OperatingSystem.IsLinux())
-                {
-                    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
-                    return;
-                }
+                //if (!OperatingSystem.IsLinux())
+                //{
+                //    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
+                //    return;
+                //}
 
                 DockerInDocker = dockerInDocker;
             }
@@ -597,13 +596,20 @@ namespace NanoDNA.DockerManager
             if (!DockerInDocker)
                 return "";
 
-            CommandRunner runner = new CommandRunner();
+            if (OperatingSystem.IsLinux())
+            {
+                CommandRunner runner = new CommandRunner();
 
-            runner.TryRunCommand("(getent group docker | cut -d: -f3)");
+                runner.TryRunCommand("(getent group docker | cut -d: -f3)");
 
-            string ID = runner.StandardOutput[0];
+                string ID = runner.StandardOutput[0];
 
-            return $"--privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock ";
+                return $"--privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock ";
+            }
+            else if (OperatingSystem.IsWindows())
+                AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
+
+            return "";
         }
 
         /// <summary>
@@ -618,8 +624,8 @@ namespace NanoDNA.DockerManager
 
             args += interactive ? "-it " : "";
             args += detached ? "-d " : "";
-            args += GetEnvironmentVariables();
             args += GetDockerInDocker();
+            args += GetEnvironmentVariables();
 
             return args;
         }
