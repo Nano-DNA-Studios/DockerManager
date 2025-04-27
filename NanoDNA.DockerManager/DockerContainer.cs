@@ -55,26 +55,13 @@ namespace NanoDNA.DockerManager
             Image = image;
             IgnoreContainerErrors = ignoreContainerErrors;
             EnvironmentVariables = new Dictionary<string, string>();
+            DockerInDocker = dockerInDocker;
 
             if (Name != Name.ToLower())
                 throw new ArgumentException("Name must be lowercase");
 
             if (Name != Name.Trim() || Name != Name.Replace(" ", ""))
                 throw new ArgumentException("Name must not contain spaces");
-
-            if (dockerInDocker)
-            {
-                //if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
-                //    EnvironmentVariables.Add("DOCKER_HOST", "tcp://host.docker.internal:2375");
-
-                //if (!OperatingSystem.IsLinux())
-                //{
-                //    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
-                //    return;
-                //}
-
-                DockerInDocker = dockerInDocker;
-            }
         }
 
         /// <summary>
@@ -92,26 +79,13 @@ namespace NanoDNA.DockerManager
             Image = image;
             IgnoreContainerErrors = ignoreContainerErrors;
             EnvironmentVariables = environmentVariables;
+            DockerInDocker = dockerInDocker;
 
             if (Name != Name.ToLower())
                 throw new ArgumentException("Name must be lowercase");
 
             if (Name != Name.Trim() || Name != Name.Replace(" ", ""))
                 throw new ArgumentException("Name must not contain spaces");
-
-            if (dockerInDocker)
-            {
-                //if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
-                //    EnvironmentVariables.Add("DOCKER_HOST", "tcp://host.docker.internal:2375");
-
-                if (!OperatingSystem.IsLinux())
-                {
-                    Console.WriteLine("Docker In Docker Features will not work on Non Linux Machines");
-                    return;
-                }
-
-                DockerInDocker = dockerInDocker;
-            }
         }
 
         /// <summary>
@@ -184,7 +158,7 @@ namespace NanoDNA.DockerManager
             if (!Docker.Running())
                 throw new InvalidOperationException("Docker Service is not Running");
 
-            if (!Exists()) //Maybe Exists?
+            if (!Exists())
                 throw new Exception("Container Doesn't Exist, cannot get Logs of a Non Existent Container");
 
             CommandRunner runner = new CommandRunner();
