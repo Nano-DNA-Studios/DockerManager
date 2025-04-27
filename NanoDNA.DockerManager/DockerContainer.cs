@@ -3,6 +3,7 @@ using System.Threading;
 using NanoDNA.ProcessRunner;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 
 namespace NanoDNA.DockerManager
 {
@@ -570,20 +571,33 @@ namespace NanoDNA.DockerManager
             if (!DockerInDocker)
                 return "";
 
-            if (OperatingSystem.IsLinux())
-            {
-                CommandRunner runner = new CommandRunner();
+            CommandRunner runner = new CommandRunner();
 
-                runner.TryRunCommand("(getent group docker | cut -d: -f3)");
+            if (OperatingSystem.IsLinux() && File.Exists("/var/run/docker.sock") && runner.TryRunCommand("(getent group docker | cut -d: -f3)"))
+                return $"--privileged --group-add {runner.StandardOutput[0]} -v /var/run/docker.sock:/var/run/docker.sock ";
 
-                string ID = runner.StandardOutput[0];
-
-                return $"--privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock ";
-            }
-            else if (OperatingSystem.IsWindows())
-                AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
+            Console.WriteLine("Using Env Variable");
+            AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
 
             return "";
+
+            //if (OperatingSystem.IsLinux())
+            //{
+            //    CommandRunner runner = new CommandRunner();
+            //
+            //    if (!runner.TryRunCommand("(getent group docker | cut -d: -f3)"))
+            //    {
+            //        Console.WriteLine("Using Env Variable");
+            //        AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
+            //        return "";
+            //    }
+            //
+            //    string ID = runner.StandardOutput[0];
+            //
+            //    return $"--privileged --group-add {ID} -v /var/run/docker.sock:/var/run/docker.sock ";
+            //}
+            //else if (OperatingSystem.IsWindows())
+            //    AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
         }
 
         /// <summary>
