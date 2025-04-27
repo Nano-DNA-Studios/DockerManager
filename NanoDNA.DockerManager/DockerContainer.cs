@@ -577,7 +577,10 @@ namespace NanoDNA.DockerManager
                 return $"--privileged --group-add {runner.StandardOutput[0]} -v /var/run/docker.sock:/var/run/docker.sock ";
 
             Console.WriteLine("Using Env Variable");
-            AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
+            if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
+                AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
+            else
+                Console.WriteLine("Docker Host already set, not setting it again");
 
             return "";
 
