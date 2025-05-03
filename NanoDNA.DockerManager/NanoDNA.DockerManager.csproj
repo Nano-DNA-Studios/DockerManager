@@ -26,9 +26,27 @@
 
 	<!-- Include Items to Edit -->
 	<ItemGroup>
-		<None Include="..\README.md" />
-		<None Include="..\Directory.Build.props" />
-		<None Include="..\LICENSE" />
+		<!-- Project Documents -->
+		<None Include="..\README.md">
+			<Link>Docs\README.md</Link>
+		</None>
+		<None Include="..\Directory.Build.props">
+			<Link>Docs\Directory.Build.props</Link>
+		</None>
+		<None Include="..\LICENSE">
+			<Link>Docs\LICENSE</Link>
+		</None>
+
+		<!-- Workflow Scripts -->
+		<None Include="..\.github\workflows\build.yml">
+			<Link>Workflows\build.yml</Link>
+		</None>
+		<None Include="..\.github\workflows\publish.yml">
+			<Link>Workflows\publish.yml</Link>
+		</None>
+		<None Include="..\.github\workflows\test.yml">
+			<Link>Workflows\test.yml</Link>
+		</None>
 	</ItemGroup>
 
 </Project>
