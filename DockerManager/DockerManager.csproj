@@ -28,7 +28,7 @@
 
 	<!-- Nuget Packages -->
 	<ItemGroup>
-		<PackageReference Include="ProcessRunner" Version="0.1.5" Condition="'$(Configuration)' == 'Release'"/>
+		<PackageReference Include="NanoDNA.ProcessRunner" Version="0.2.0" Condition="'$(Configuration)' == 'Release'"/>
 	</ItemGroup>
 
 	<!-- Include Items to Edit -->
