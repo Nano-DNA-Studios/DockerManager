@@ -24,4 +24,11 @@
 		<PackageReference Include="NanoDNA.ProcessRunner" Version="0.1.5" Condition="'$(Configuration)' == 'Release'"/>
 	</ItemGroup>
 
+	<!-- Include Items to Edit -->
+	<ItemGroup>
+		<None Include="..\README.md" />
+		<None Include="..\Directory.Build.props" />
+		<None Include="..\LICENSE" />
+	</ItemGroup>
+
 </Project>
