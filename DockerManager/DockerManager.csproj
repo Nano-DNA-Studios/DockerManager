@@ -10,6 +10,7 @@
 	<PropertyGroup>
 		<RootNamespace>NanoDNA.DockerManager</RootNamespace>
 		<ProductName>$(RootNamespace)</ProductName>
+		<PackageId>$(RootNamespace)</PackageId>
 		<AssemblyName>$(RootNamespace)</AssemblyName>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
@@ -27,7 +28,7 @@
 
 	<!-- Nuget Packages -->
 	<ItemGroup>
-		<PackageReference Include="NanoDNA.ProcessRunner" Version="0.1.5" Condition="'$(Configuration)' == 'Release'"/>
+		<PackageReference Include="ProcessRunner" Version="0.1.5" Condition="'$(Configuration)' == 'Release'"/>
 	</ItemGroup>
 
 	<!-- Include Items to Edit -->

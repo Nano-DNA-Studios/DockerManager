@@ -87,11 +87,11 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet build ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" -p:Version=${{ needs.version.outputs.version }} --self-contained true
+        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" -p:Version=${{ needs.version.outputs.version }} --self-contained true
   
   upload-source:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
-    needs: build-source
+    needs: [build-source, version]
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
@@ -100,7 +100,7 @@ jobs:
     steps:
       - name: Compress Standalone Source
         shell: bash
-        run: tar -czf ./nupkg/${{ github.event.repository.name }}-${{ needs.version.outputs.version }}-${{ matrix.platforms }}.tar.gz -C ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }} .
+        run: tar -czf ./nupkg/${{ github.event.repository.name }}-${{ needs.version.outputs.version }}-${{ matrix.platforms }}.tar.gz -C ${{ github.event.repository.name }}/bin/Release/net8.0/${{ matrix.platforms }}/publish .
 
       - name: Upload Standalone Source
         uses: actions/upload-artifact@v4
