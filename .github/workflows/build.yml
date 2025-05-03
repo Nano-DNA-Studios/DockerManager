@@ -30,8 +30,6 @@ jobs:
   build-nuget:
     runs-on: ["self-hosted", "run-${{github.run_id}}"]
     needs: setup
-    outputs:
-      packages: ${{ steps.extract-package-names.outputs.PACKAGES}}
     steps:
       - name: Build for NuGet 
         shell: bash
@@ -62,4 +60,4 @@ jobs:
     steps:
       - name: Build as Standalone Source
         shell: bash
-        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true 
+        run: dotnet build ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release -r "${{ matrix.platforms }}" --self-contained true
