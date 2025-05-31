@@ -398,127 +398,73 @@ namespace NanoDNA.DockerManager
         }
 
         /// <summary>
-        /// Waits for the Container to Exist for a specified amount of time
+        /// Generic Function for Repeatedly checking a Condition until it is met or a Timeout Occurs
         /// </summary>
-        /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
-        /// <returns>Task Waiting for the Container to Exist</returns>
-        public void WaitUntilExists(int maxWaitSec = 10)
+        /// <param name="condition">Function representing the Condition to repeatedly Check. Function will block thread until the condition is equivalent to <paramref name="expectedResult"/></param>
+        /// <param name="expectedResult">The expected result of the condition function before unblocking the thread</param>
+        /// <param name="label">Debugging Label to print</param>
+        /// <param name="maxWaitSec">Maximum number of Seconds to wait for before continuing as a Timeout error</param>
+        private void WaitUntil(Func<bool> condition, bool expectedResult, string label, int maxWaitSec)
         {
             int waitCount = maxWaitSec * 10;
             int count = 0;
-            while (!Exists() && count < waitCount)
+            while (condition() != expectedResult && count < waitCount)
             {
                 Thread.Sleep(100);
                 count++;
             }
 
             if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Exists : {Exists()} ({count})");
+                Console.WriteLine($"Docker Container {label} : {condition()} ({count})");
         }
+
+        /// <summary>
+        /// Waits for the Container to Exist for a specified amount of time
+        /// </summary>
+        /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
+        /// <returns>Task Waiting for the Container to Exist</returns>
+        public void WaitUntilExists(int maxWaitSec = 10) => WaitUntil(Exists, true, "Exists", maxWaitSec);
 
         /// <summary>
         /// Waits for the Container to be Running for a specified amount of time
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Running</returns>
-        public void WaitUntilRunning(int maxWaitSec = 10)
-        {
-            int waitCount = maxWaitSec * 10;
-            int count = 0;
-            while (!Running() && count < waitCount)
-            {
-                Thread.Sleep(100);
-                count++;
-            }
-
-            if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Running : {Running()} ({count})");
-        }
+        public void WaitUntilRunning(int maxWaitSec = 10) => WaitUntil(Running, true, "Running", maxWaitSec);
 
         /// <summary>
         /// Waits for the Container to be Ready for a specified amount of time
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Ready</returns>
-        public void WaitUntilReady(int maxWaitSec = 10)
-        {
-            int waitCount = maxWaitSec * 10;
-            int count = 0;
-            while (!Ready() && count < waitCount)
-            {
-                Thread.Sleep(100);
-                count++;
-            }
-
-            if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Ready : {Ready()} ({count})");
-        }
+        public void WaitUntilReady(int maxWaitSec = 10) => WaitUntil(Ready, true, "Ready", maxWaitSec);
 
         /// <summary>
         /// Waits for the Container to Not Exist for a specified amount of time
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to Exist</returns>
-        public void WaitUntilRemoved(int maxWaitSec = 10)
-        {
-            int waitCount = maxWaitSec * 10;
-            int count = 0;
-            while (Exists() && count < waitCount)
-            {
-                Thread.Sleep(100);
-                count++;
-            }
-
-            if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Exists : {Exists()} ({count})");
-        }
+        public void WaitUntilRemoved(int maxWaitSec = 10) => WaitUntil(Exists, false, "Exists", maxWaitSec);
 
         /// <summary>
         /// Waits for the Container to Not be Running for a specified amount of time
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Running</returns>
-        public void WaitUntilStopped(int maxWaitSec = 10)
-        {
-            int waitCount = maxWaitSec * 10;
-            int count = 0;
-            while (Running() && count < waitCount)
-            {
-                Thread.Sleep(100);
-                count++;
-            }
-
-            if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Running : {Running()} ({count})");
-        }
+        public void WaitUntilStopped(int maxWaitSec = 10) => WaitUntil(Running, false, "Running", maxWaitSec);
 
         /// <summary>
         /// Waits for the Container to Not be Ready for a specified amount of time
         /// </summary>
         /// <param name="maxWaitSec">Max number of Seconds to Wait</param>
         /// <returns>Task Waiting for the Container to be Ready</returns>
-        public void WaitUntilUnready(int maxWaitSec = 10)
-        {
-            int waitCount = maxWaitSec * 10;
-            int count = 0;
-            while (Ready() && count < waitCount)
-            {
-                Thread.Sleep(100);
-                count++;
-            }
-
-            if (Docker.DEBUG)
-                Console.WriteLine($"Docker Container Ready : {Ready()} ({count})");
-        }
+        public void WaitUntilUnready(int maxWaitSec = 10) => WaitUntil(Ready, false, "Running", maxWaitSec);
 
         /// <summary>
         /// Checks if the Container is Ready to be used
         /// </summary>
         /// <returns>True if the Container Exists and is Running</returns>
-        public bool Ready()
-        {
-            return Exists() && Running();
-        }
+        public bool Ready() => Exists() && Running();
 
         /// <summary>
         /// Checks if the Docker Container is Running
