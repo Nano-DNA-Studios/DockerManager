@@ -141,11 +141,11 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            if (!runner.TryRunCommand($"docker exec {Name} {command}"))
-                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
+            if (!runner.TryRun($"docker exec {Name} {command}"))
+                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.STDError)}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Executing Command : ({command}) -> {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -164,12 +164,12 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.TryRunCommand($"docker logs {Name}");
+            runner.TryRun($"docker logs {Name}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Getting Docker Logs : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Getting Docker Logs : {string.Join("\n", runner.STDError)}");
 
-            return string.Join("\n", runner.StandardOutput);
+            return string.Join("\n", runner.STDOutput);
         }
 
         /// <summary>
@@ -193,10 +193,10 @@ namespace NanoDNA.DockerManager
 
             string forceArg = force ? "-f" : "";
 
-            runner.TryRunCommand($"docker rm {forceArg} {Name}");
+            runner.TryRun($"docker rm {forceArg} {Name}");
 
-            if (runner.StandardError.Length != 0)
-                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0)
+                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -220,10 +220,10 @@ namespace NanoDNA.DockerManager
 
             string forceArg = force ? "-f" : "";
 
-            await runner.TryRunCommandAsync($"docker rm {forceArg} {Name}");
+            await runner.TryRunAsync($"docker rm {forceArg} {Name}");
 
-            if (runner.StandardError.Length != 0)
-                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0)
+                throw new Exception($"Error Removing Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -244,10 +244,10 @@ namespace NanoDNA.DockerManager
 
             string timeArg = time != 0 ? $"--time {time}" : "";
 
-            runner.TryRunCommand($"docker stop {timeArg} {Name}");
+            runner.TryRun($"docker stop {timeArg} {Name}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -268,10 +268,10 @@ namespace NanoDNA.DockerManager
 
             string timeArg = time != 0 ? $"--time {time}" : "";
 
-            await runner.TryRunCommandAsync($"docker stop {timeArg} {Name}");
+            await runner.TryRunAsync($"docker stop {timeArg} {Name}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Stopping Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -289,10 +289,10 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            runner.TryRunCommand($"docker kill {Name}");
+            runner.TryRun($"docker kill {Name}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Killing Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Killing Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -321,10 +321,10 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            await runner.TryRunCommandAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {command}");
+            await runner.TryRunAsync($"docker run --name {Name} --rm {GetAdditionalArguments(true, false)} {Image} {command}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -343,11 +343,11 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            if (!runner.TryRunCommand($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}"))
-                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (!runner.TryRun($"docker run --name {Name} --rm {GetAdditionalArguments(false, false)} {Image} {command}"))
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.STDError)}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -368,10 +368,10 @@ namespace NanoDNA.DockerManager
 
             string command = $"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}";
 
-            runner.TryRunCommand(command);
+            runner.TryRun(command);
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : (Command : {command}) \n{string.Join("\n", runner.StandardError)} \n {string.Join("\n", runner.StandardOutput)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Starting Docker Container : (Command : {command}) \n{string.Join("\n", runner.STDError)} \n {string.Join("\n", runner.STDOutput)}");
         }
 
         /// <summary>
@@ -391,10 +391,10 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            await runner.TryRunCommandAsync($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
+            await runner.TryRunAsync($"docker run --name {Name} {GetAdditionalArguments(true, interactive)} {Image}");
 
-            if (runner.StandardError.Length != 0 && !IgnoreContainerErrors)
-                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.StandardError)}");
+            if (runner.STDError.Length != 0 && !IgnoreContainerErrors)
+                throw new Exception($"Error Starting Docker Container : {string.Join("\n", runner.STDError)}");
         }
 
         /// <summary>
@@ -475,9 +475,9 @@ namespace NanoDNA.DockerManager
             CommandRunner runner = new CommandRunner();
             string stateStr = "\"{{.State.Running}}\"";
 
-            runner.TryRunCommand($"docker inspect -f {stateStr} {Name}");
+            runner.TryRun($"docker inspect -f {stateStr} {Name}");
 
-            return runner.StandardOutput[runner.StandardOutput.Length - 1] == "true";
+            return runner.STDOutput[runner.STDOutput.Length - 1] == "true";
         }
 
         /// <summary>
@@ -489,9 +489,9 @@ namespace NanoDNA.DockerManager
             CommandRunner runner = new CommandRunner();
             string stateStr = "\"{{.State.Paused}}\"";
 
-            runner.TryRunCommand($"docker inspect -f {stateStr} {Name}");
+            runner.TryRun($"docker inspect -f {stateStr} {Name}");
 
-            return runner.StandardOutput[runner.StandardOutput.Length - 1] == "true";
+            return runner.STDOutput[runner.STDOutput.Length - 1] == "true";
         }
 
         /// <summary>
@@ -519,8 +519,8 @@ namespace NanoDNA.DockerManager
 
             CommandRunner runner = new CommandRunner();
 
-            if (OperatingSystem.IsLinux() && File.Exists("/var/run/docker.sock") && runner.TryRunCommand("(getent group docker | cut -d: -f3)"))
-                return $"--privileged --group-add {runner.StandardOutput[0]} -v /var/run/docker.sock:/var/run/docker.sock ";
+            if (OperatingSystem.IsLinux() && File.Exists("/var/run/docker.sock") && runner.TryRun("(getent group docker | cut -d: -f3)"))
+                return $"--privileged --group-add {runner.STDOutput[0]} -v /var/run/docker.sock:/var/run/docker.sock ";
 
             if (!EnvironmentVariables.ContainsKey("DOCKER_HOST"))
                 AddEnvironmentVariable("DOCKER_HOST", "tcp://host.docker.internal:2375");
